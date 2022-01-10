@@ -5,8 +5,8 @@ from kivymd.uix.dialog import MDDialog
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy_builder import kivy_builder
 
-from kivy.core.window import Window
-Window.size = (540/1.5, 960/1.5)  # phone size, can be commented out
+# from kivy.core.window import Window
+# Window.size = (540, 960)  # phone size, can be commented out
 
 class LoginScreen(Screen):
     pass

@@ -38,13 +38,10 @@ ScreenManager:
             Screen:
                 BoxLayout:
                     orientation: 'vertical'
-                    MDBottomAppBar:
-                        MDToolbar:
-                            icon: 'account'
-                            type: 'bottom'
-                            left_action_items: [["menu", lambda x: nav_drawer.set_state("open")]]
-                            right_action_items: [["exit-to-app", lambda x: app.logout()]]
-                            on_action_button: app.profile()
+                    MDToolbar:
+                        icon: 'account'
+                        left_action_items: [["menu", lambda x: nav_drawer.set_state("open")]]
+                        right_action_items: [["exit-to-app", lambda x: app.logout()]]
                     MDLabel:
                         text: 'Home Page'
                         haligh: 'center'
