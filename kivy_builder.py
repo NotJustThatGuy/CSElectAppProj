@@ -8,7 +8,8 @@ ScreenManager:
     MDTextField:
         id: username
         hint_text: "Enter username"
-        helper_text: "Your username or new username"
+        write_tab: False
+        helper_text: "Old username for login; New username to register"
         helper_text_mode: "on_focus"
         icon_right: "account"
         icon_right_color: app.theme_cls.primary_color
@@ -18,8 +19,9 @@ ScreenManager:
     MDTextField:
         id: password
         password: True 
+        write_tab: False
         hint_text: "Enter password"
-        helper_text: "Your password or new password"
+        helper_text: "Make sure your password matches your username"
         helper_text_mode: "on_focus"
         icon_right: "lock"
         icon_right_color: app.theme_cls.primary_color
@@ -29,7 +31,7 @@ ScreenManager:
     MDRectangleFlatButton:
         text: 'Login'
         pos_hint: {'center_x': 0.5, 'center_y': 0.4}
-        on_release: app.show_data()
+        on_release: app.login()
     
 <HomeScreen>:
     name:'home'
@@ -45,6 +47,13 @@ ScreenManager:
                     MDLabel:
                         text: 'Home Page'
                         haligh: 'center'
+                    MDBottomAppBar:
+                        MDToolbar:
+                            title: 'Welcome'
+                            icon: 'account'
+                            type: 'bottom'
+                            mode: 'end'
+                            on_action_button: app.profile()
         MDNavigationDrawer:
             id:nav_drawer
 
