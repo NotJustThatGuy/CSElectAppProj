@@ -19,6 +19,10 @@ class Database:
             buffered=True
         )
 
+    def open(self):
+        self.dbConn = self.load()
+        self.dbCursor = self.dbConn.cursor()
+
     def close(self):
         self.dbConn.close()
 

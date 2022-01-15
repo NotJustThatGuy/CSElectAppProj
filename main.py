@@ -49,6 +49,7 @@ class FinalApp(MDApp):
         self.run_loading()
         Clock.schedule_once(self.login_process)
     def login_process(self, *args):
+        self.db.open()
         close_button = MDRaisedButton(text="Close", on_release=self.close_dialog)
         more_button = MDFlatButton(text="Forgot Password", on_release=self.comingSoonToast)
         self.dialog = MDDialog(title='Username Check', buttons=[more_button, close_button])
@@ -74,6 +75,7 @@ class FinalApp(MDApp):
                 self.loading.dismiss()
                 self.dialog.text = 'Account has been created. Please login again'
                 self.dialog.open()
+        self.db.close()
         # print(self.login_ids.username.text)
 
     def run_loading(self):
@@ -109,7 +111,10 @@ class FinalApp(MDApp):
         self.login_ids.password.set_text(None, "")
         self.screen.current = 'login'
         self.dialog.dismiss()
+        self.db.open()
         self.db.setStatus(0)
+        self.db.currentUser = ""
+        self.db.close()
 
     def build(self):
         self.theme_cls.primary_palette = "Teal"
@@ -118,6 +123,7 @@ class FinalApp(MDApp):
         return self.screen
 
     def on_stop(self):
+        self.db.open()
         self.db.setStatus(0)
         self.db.close()
 
