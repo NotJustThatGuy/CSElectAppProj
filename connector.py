@@ -8,6 +8,7 @@ class Database:
         self.dbDatabase = dbDatabase
         self.dbConn = self.load()
         self.dbCursor = self.dbConn.cursor()
+        self.currentUser = ""
 
     def load(self):
         return mysql.connector.connect(
@@ -17,6 +18,9 @@ class Database:
             database=self.dbDatabase,
             buffered=True
         )
+
+    def close(self):
+        self.dbConn.close()
 
     def isUserPass(self, username, password):
         sql = "SELECT username, password from Users WHERE username = '{}'".format(username)
@@ -40,3 +44,9 @@ class Database:
             return False
         else:
             return True
+
+    def setStatus(self, status):
+        sql = "UPDATE Users set Status = '{}' WHERE Username = '{}'".format(status, self.currentUser)
+        self.dbCursor.execute(sql)
+        self.dbConn.commit()
+
