@@ -39,6 +39,21 @@ class Database:
         sql = "INSERT INTO Users (Username, Password) VALUES ('{}', '{}')".format(username, password)
         self.dbCursor.execute(sql)
         self.dbConn.commit()
+        sql = "INSERT INTO UserInfo VALUES ('{}', '{}', '{}', '{}', '{}')".format(username, "Undefined", "Undefined", "Undefined", "Undefined")
+        self.dbCursor.execute(sql)
+        self.dbConn.commit()
+
+    def getUserInfo(self):
+        sql = "SELECT * from UserInfo WHERE username = '{}'".format(self.currentUser)
+        self.dbCursor.execute(sql)
+        dbResult = self.dbCursor.fetchone()
+        return dbResult
+
+    def setUserInfo(self, fname, mname, lname, bio):
+        sql = "UPDATE UserInfo set FName = '{}', MName = '{}', LName = '{}', Bio = '{}' WHERE Username = '{}'".format(fname, mname, lname, bio,
+                                                                                                                     self.currentUser)
+        self.dbCursor.execute(sql)
+        self.dbConn.commit()
 
     def isExisting(self, username):
         sql = "SELECT username from Users WHERE username = '{}'".format(username)

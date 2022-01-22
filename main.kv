@@ -1,8 +1,7 @@
-kivy_builder = """
 ScreenManager:
     LoginScreen:
     HomeScreen:
-    
+
 <LoginScreen>:
     name:'login'
     MDTextField:
@@ -17,7 +16,7 @@ ScreenManager:
         width: 400
     MDTextField:
         id: password
-        password: True 
+        password: True
         write_tab: False
         hint_text: "Enter password"
         helper_text_mode: "on_focus"
@@ -30,7 +29,7 @@ ScreenManager:
         text: 'Login'
         pos_hint: {'center_x': 0.5, 'center_y': 0.4}
         on_release: app.login()
-    
+
 <HomeScreen>:
     name:'home'
     MDNavigationLayout:
@@ -80,7 +79,7 @@ ScreenManager:
                                 text: "Single-line item"
         MDNavigationDrawer:
             id:nav_drawer
-    
+
     MDFloatingActionButtonSpeedDial:
         data: app.data
         root_button_anim: True
@@ -89,7 +88,7 @@ ScreenManager:
         label_text_color: 1,1,1,1
         md_bg_color: app.theme_cls.primary_color
         callback: app.profile_callback
-    
+
 <ProfileCard>
     orientation: 'horizontal'
     size_hint_y: None
@@ -140,7 +139,7 @@ ScreenManager:
             theme_text_color: "Custom"
             text_color: 1,1,1,1
             halign: "left"
-            text: "\\n"
+            text: "\n"
             font_style: "Caption"
             size_hint_y: None
             height: self.texture_size[1]
@@ -154,7 +153,7 @@ ScreenManager:
             font_style: "Caption"
             size_hint_y: None
             height: self.texture_size[1]
-            
+
 <EditProfileCard>
     padding: 0,0,0,20
     orientation: "vertical"
@@ -174,5 +173,3 @@ ScreenManager:
     MDTextField:
         id:bio
         hint_text: "Bio"
-
-"""
