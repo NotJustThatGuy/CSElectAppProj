@@ -8,6 +8,7 @@ from kivymd.uix.behaviors import RoundedRectangularElevationBehavior
 from kivymd.uix.card import MDCard
 from kivymd.uix.dialog import MDDialog
 from kivy.uix.screenmanager import ScreenManager, Screen
+from kivymd.uix.list import TwoLineIconListItem
 from kivymd.uix.spinner import MDSpinner
 
 from kivymd.toast import toast
@@ -27,6 +28,12 @@ class LoginScreen(Screen):
 
 class HomeScreen(Screen):
     pass
+
+class ProfileListItem(TwoLineIconListItem):
+    def __init__(self, name, username, **kwargs):
+        super().__init__(**kwargs)
+        self.text = name
+        self.secondary_text = username
 
 class ProfileCard(MDCard):
     def set_info(self):
@@ -188,6 +195,13 @@ class FinalApp(MDApp):
         self.db.setStatus(0)
         self.db.currentUser = ""
         self.db.close()
+
+    def updateList(self):
+        self.db.open()
+        user_basic = self.db.getUsersBasic()
+        self.db.close()
+        for x in user_basic:
+            self.home_ids.profile_list.add_widget(ProfileListItem(x[0], x[3] + ", " + x[1] + " " + x[2]))
 
     def build(self):
         self.theme_cls.primary_palette = "Teal"

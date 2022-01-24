@@ -1,4 +1,11 @@
 import mysql.connector
+from passlib.context import CryptContext
+
+pwd_context = CryptContext(
+    schemes=["pbkdf2_sha256"],
+    default="pbkdf2_sha256",
+    pbkdf2_sha256__default_rounds=30000
+)
 
 class Database:
     def __init__(self, dbUsername, dbPassword, dbHostname, dbDatabase):
@@ -69,3 +76,16 @@ class Database:
         self.dbCursor.execute(sql)
         self.dbConn.commit()
 
+    def getUsersBasic(self):
+        sql = "SELECT Users.username as Username, UserInfo.fname as FName, UserInfo.mname as MName, UserInfo.lname as LName FROM `Users` " \
+              "INNER JOIN UserInfo ON Users.Username = UserInfo.Username "
+        # "WHERE Users.Username != '{}'".format(self.currentUser)
+        self.dbCursor.execute(sql)
+        dbResult = self.dbCursor.fetchall()
+        return dbResult
+
+def encrypt(text):
+    return pwd_context.hash(text)
+
+def check_encrypted(text, hashed):
+    return pwd_context.verify(text, hashed)

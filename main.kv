@@ -4,6 +4,13 @@ ScreenManager:
 
 <LoginScreen>:
     name:'login'
+    MDLabel:
+        text: "Facegram"
+        font_style: "H3"
+        halign: "center"
+        pos_hint: {'center_x': 0.5, 'center_y': 0.75}
+        theme_text_color: "Custom"
+        text_color: app.theme_cls.primary_color
     MDTextField:
         id: username
         hint_text: "Enter username"
@@ -29,12 +36,24 @@ ScreenManager:
         text: 'Login'
         pos_hint: {'center_x': 0.5, 'center_y': 0.4}
         on_release: app.login()
+    MDLabel:
+        text: "Developed by:\n\nArnin Mendoza\nJeric June Logan\nJiro Mark Garcia\nMark Jimwell Lagarta"
+        font_style: "Subtitle1"
+        halign: "center"
+        pos_hint: {'center_x': 0.5, 'center_y': 0.2}
+        theme_text_color: "Custom"
+        text_color: app.theme_cls.primary_color
 
 <HomeScreen>:
     name:'home'
+    on_pre_enter:
+        app.updateList()
     MDNavigationLayout:
         ScreenManager:
             Screen:
+                id: main_menu
+                on_pre_enter:
+                    app.updateList()
                 BoxLayout:
                     orientation: 'vertical'
                     MDToolbar:
@@ -43,40 +62,7 @@ ScreenManager:
                         right_action_items: [["exit-to-app", lambda x: app.logout()]]
                     ScrollView:
                         MDList:
-                            OneLineListItem:
-                                text: "Single-line item"
-                            OneLineListItem:
-                                text: "Single-line item"
-                            OneLineListItem:
-                                text: "Single-line item"
-                            OneLineListItem:
-                                text: "Single-line item"
-                            OneLineListItem:
-                                text: "Single-line item"
-                            OneLineListItem:
-                                text: "Single-line item"
-                            OneLineListItem:
-                                text: "Single-line item"
-                            OneLineListItem:
-                                text: "Single-line item"
-                            OneLineListItem:
-                                text: "Single-line item"
-                            OneLineListItem:
-                                text: "Single-line item"
-                            OneLineListItem:
-                                text: "Single-line item"
-                            OneLineListItem:
-                                text: "Single-line item"
-                            OneLineListItem:
-                                text: "Single-line item"
-                            OneLineListItem:
-                                text: "Single-line item"
-                            OneLineListItem:
-                                text: "Single-line item"
-                            OneLineListItem:
-                                text: "Single-line item"
-                            OneLineListItem:
-                                text: "Single-line item"
+                            id: profile_list
         MDNavigationDrawer:
             id:nav_drawer
 
@@ -154,7 +140,7 @@ ScreenManager:
             size_hint_y: None
             height: self.texture_size[1]
 
-<EditProfileCard>
+<EditProfileCard>:
     padding: 0,0,0,20
     orientation: "vertical"
     spacing: "12dp"
@@ -173,3 +159,10 @@ ScreenManager:
     MDTextField:
         id:bio
         hint_text: "Bio"
+
+<ProfileListItem>:
+    text: "Two-line item"
+    secondary_text: "Secondary text here"
+
+    IconLeftWidget:
+        icon: "account"
