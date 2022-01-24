@@ -7,6 +7,7 @@ pwd_context = CryptContext(
     pbkdf2_sha256__default_rounds=30000
 )
 
+
 class Database:
     def __init__(self, dbUsername, dbPassword, dbHostname, dbDatabase):
         self.dbUsername = dbUsername
@@ -37,28 +38,31 @@ class Database:
         sql = "SELECT username, password from Users WHERE username = '{}'".format(username)
         self.dbCursor.execute(sql)
         dbResult = self.dbCursor.fetchone()
-        if password == dbResult[1]:
-            return True
-        else:
+        if dbResult is None:
             return False
+        else:
+            return check_encrypted(password, dbResult[1])
 
     def createAcc(self, username, password):
-        sql = "INSERT INTO Users (Username, Password) VALUES ('{}', '{}')".format(username, password)
+        hashPassword = encrypt(password)
+        sql = "INSERT INTO Users (Username, Password) VALUES ('{}', '{}')".format(username, hashPassword)
         self.dbCursor.execute(sql)
         self.dbConn.commit()
         sql = "INSERT INTO UserInfo VALUES ('{}', '{}', '{}', '{}', '{}')".format(username, "Undefined", "Undefined", "Undefined", "Undefined")
         self.dbCursor.execute(sql)
         self.dbConn.commit()
 
-    def getUserInfo(self):
-        sql = "SELECT * from UserInfo WHERE username = '{}'".format(self.currentUser)
+    def getUserInfo(self, username=None):
+        if username is None:
+            username = self.currentUser
+        sql = "SELECT * from UserInfo WHERE username = '{}'".format(username)
         self.dbCursor.execute(sql)
         dbResult = self.dbCursor.fetchone()
         return dbResult
 
     def setUserInfo(self, fname, mname, lname, bio):
         sql = "UPDATE UserInfo set FName = '{}', MName = '{}', LName = '{}', Bio = '{}' WHERE Username = '{}'".format(fname, mname, lname, bio,
-                                                                                                                     self.currentUser)
+                                                                                                                      self.currentUser)
         self.dbCursor.execute(sql)
         self.dbConn.commit()
 
@@ -78,14 +82,15 @@ class Database:
 
     def getUsersBasic(self):
         sql = "SELECT Users.username as Username, UserInfo.fname as FName, UserInfo.mname as MName, UserInfo.lname as LName FROM `Users` " \
-              "INNER JOIN UserInfo ON Users.Username = UserInfo.Username "
-        # "WHERE Users.Username != '{}'".format(self.currentUser)
+              "INNER JOIN UserInfo ON Users.Username = UserInfo.Username WHERE Users.Username != '{}'".format(self.currentUser)
         self.dbCursor.execute(sql)
         dbResult = self.dbCursor.fetchall()
         return dbResult
 
+
 def encrypt(text):
     return pwd_context.hash(text)
+
 
 def check_encrypted(text, hashed):
     return pwd_context.verify(text, hashed)

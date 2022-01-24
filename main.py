@@ -30,22 +30,54 @@ class HomeScreen(Screen):
     pass
 
 class ProfileListItem(TwoLineIconListItem):
-    def __init__(self, name, username, **kwargs):
+    def __init__(self, username, name, **kwargs):
         super().__init__(**kwargs)
         self.text = name
         self.secondary_text = username
 
-class ProfileCard(MDCard):
-    def set_info(self):
+    def on_release(self):
         app = MDApp.get_running_app()
         app.db.open()
-        userInfo = app.db.getUserInfo()
-        self.ids.profile_basic.text = app.db.currentUser
-        self.ids.profile_basic_2.text = userInfo[3] + ", " + userInfo[1] + " " + userInfo[2]
-        self.ids.bio_p.text = userInfo[4]
+        userInfo = app.db.getUserInfo(username=self.secondary_text)
+        username = userInfo[0]
+        full_name = userInfo[3] + ", " + userInfo[1] + " " + userInfo[2]
+        bio = userInfo[4]
+        pc = ProfileCard(username, full_name, bio)
+        app.dialog = MDDialog(
+            type="custom",
+            content_cls=pc,
+            md_bg_color=app.theme_cls.primary_color,
+        )
         app.db.close()
+        app.dialog.open()
+
+class ProfileCard(MDCard):
+    def __init__(self, username, name, bio, **kwargs):
+        super().__init__(**kwargs)
+        self.ids.profile_basic.text = username
+        self.ids.profile_basic_2.text = name
+        self.ids.bio_p.text = bio
 
 class EditProfileCard(BoxLayout):
+    def __init__(self, fname, mname, lname, bio, **kwargs):
+        super().__init__(**kwargs)
+        if fname == "Undefined":
+            self.ids.fname.text = ""
+        else:
+            self.ids.fname.text = fname
+        if mname == "Undefined":
+            self.ids.mname.text = ""
+        else:
+            self.ids.mname.text = mname
+        if lname == "Undefined":
+            self.ids.lname.text = ""
+        else:
+            self.ids.lname.text = lname
+        if bio == "Undefined":
+            self.ids.bio.text = ""
+        else:
+            self.ids.bio.text = bio
+
     def submit_prompt(self, obj):
         app = MDApp.get_running_app()
         app.edit_dialog.dismiss()
@@ -59,29 +91,17 @@ class EditProfileCard(BoxLayout):
         if self.ids.bio.text == "":
             self.ids.bio.text = "Undefined"
         app.db.setUserInfo(self.ids.fname.text, self.ids.mname.text, self.ids.lname.text, self.ids.bio.text)
+        app.full_name = self.ids.lname.text + ", " + self.ids.fname.text + " " + self.ids.mname.text
+        app.fname = self.ids.fname.text
+        app.mname = self.ids.mname.text
+        app.lname = self.ids.lname.text
+        app.bio = self.ids.bio.text
+        close_button = MDRaisedButton(text="Close", on_release=app.close_dialog)
+        app.dialog = MDDialog(
+            text="Info Updated", buttons=[close_button]
+        )
+        app.dialog.open()
         app.db.close()
-
-    def set_prompt(self):
-        app = MDApp.get_running_app()
-        app.db.open()
-        userInfo = app.db.getUserInfo()
-        app.db.close()
-        if userInfo[1] == "Undefined":
-            self.ids.fname.text = ""
-        else:
-            self.ids.fname.text = str(userInfo[1])
-        if userInfo[2] == "Undefined":
-            self.ids.mname.text = ""
-        else:
-            self.ids.mname.text = str(userInfo[2])
-        if userInfo[3] == "Undefined":
-            self.ids.lname.text = ""
-        else:
-            self.ids.lname.text = str(userInfo[3])
-        if userInfo[4] == "Undefined":
-            self.ids.bio.text = ""
-        else:
-            self.ids.bio.text = str(userInfo[4])
 
 
 sm = ScreenManager()
@@ -103,6 +123,11 @@ class FinalApp(MDApp):
         self.login_ids = self.screen.get_screen('login').ids
         self.home_ids = self.screen.get_screen('home').ids
         self.db = Database(dbUsername, dbPassword, dbHostname, dbDatabase)
+        self.full_name = ""
+        self.fname = ""
+        self.mname = ""
+        self.lname = ""
+        self.bio = ""
 
     def login(self):
         self.run_loading()
@@ -125,6 +150,12 @@ class FinalApp(MDApp):
                     self.db.currentUser = username
                     self.db.setStatus(1)
                     self.loading.dismiss()
+                    userInfo = self.db.getUserInfo()
+                    self.full_name = userInfo[3] + ", " + userInfo[1] + " " + userInfo[2]
+                    self.fname = userInfo[1]
+                    self.mname = userInfo[2]
+                    self.lname = userInfo[3]
+                    self.bio = userInfo[4]
                     self.screen.current = 'home'
                 else:
                     self.loading.dismiss()
@@ -151,8 +182,8 @@ class FinalApp(MDApp):
         toast("Feature Coming Soon")
 
     def profile_callback(self, instance):
-        epc = EditProfileCard()
-        pc = ProfileCard()
+        epc = EditProfileCard(self.fname, self.mname, self.lname, self.bio)
+        pc = ProfileCard(self.db.currentUser, self.full_name, self.bio)
         yes_button = MDRaisedButton(text="Update", on_release=epc.submit_prompt)
         no_button = MDFlatButton(text="Cancel", on_release=self.close_edit_dialog)
         if instance.icon == "account":
@@ -161,10 +192,8 @@ class FinalApp(MDApp):
                 content_cls=pc,
                 md_bg_color=self.theme_cls.primary_color,
             )
-            pc.set_info()
             self.dialog.open()
         else:
-            epc.set_prompt()
             self.edit_dialog = MDDialog(
                 title="Edit Profile:",
                 type="custom",
@@ -191,10 +220,7 @@ class FinalApp(MDApp):
         self.login_ids.password.set_text(None, "")
         self.screen.current = 'login'
         self.dialog.dismiss()
-        self.db.open()
-        self.db.setStatus(0)
-        self.db.currentUser = ""
-        self.db.close()
+        self.clearData()
 
     def updateList(self):
         self.db.open()
@@ -203,16 +229,35 @@ class FinalApp(MDApp):
         for x in user_basic:
             self.home_ids.profile_list.add_widget(ProfileListItem(x[0], x[3] + ", " + x[1] + " " + x[2]))
 
+    def refresh_callback(self, *args):
+        def refresh_callback(interval):
+            self.home_ids.profile_list.clear_widgets()
+            self.updateList()
+            self.home_ids.refresh_layout.refresh_done()
+            self.tick = 0
+
+        Clock.schedule_once(refresh_callback, 1)
+
     def build(self):
         self.theme_cls.primary_palette = "Teal"
         self.theme_cls.accent_palette = "Teal"
         # self.theme_cls.theme_style = "Dark"
         return self.screen
 
-    def on_stop(self):
+    def clearData(self):
         self.db.open()
         self.db.setStatus(0)
+        self.db.currentUser = ""
         self.db.close()
+        self.full_name = ""
+        self.fname = ""
+        self.mname = ""
+        self.lname = ""
+        self.bio = ""
+        self.home_ids.profile_list.clear_widgets()
+
+    def on_stop(self):
+        self.clearData()
 
 
 FinalApp().run()

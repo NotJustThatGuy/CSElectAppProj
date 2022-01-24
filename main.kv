@@ -60,11 +60,23 @@ ScreenManager:
                         icon: 'account'
                         left_action_items: [["menu", lambda x: nav_drawer.set_state("open")]]
                         right_action_items: [["exit-to-app", lambda x: app.logout()]]
-                    ScrollView:
+                    MDScrollViewRefreshLayout:
+                        id: refresh_layout
+                        refresh_callback: app.refresh_callback
+                        root_layout: root
                         MDList:
                             id: profile_list
         MDNavigationDrawer:
             id:nav_drawer
+            BoxLayout:
+                orientation: 'vertical'
+                height: self.minimum_height
+                MDList:
+                    OneLineIconListItem:
+                        elevation:0
+                        text: 'Content Coming Soon'
+                        IconLeftWidget:
+                            icon: 'alert-circle'
 
     MDFloatingActionButtonSpeedDial:
         data: app.data
